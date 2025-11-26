@@ -1,0 +1,91 @@
+import java.net.*;
+import java.io.*;
+import java.util.Date;
+
+/**
+ * This program is a server that takes connection requests on
+ * the port specified by the constant LISTENING_PORT.  When a
+ * connection is opened, the program sends the current time to
+ * the connected socket.  The program will continue to receive
+ * and process connections until it is killed (by a CONTROL-C,
+ * for example).  Note that this server processes each connection
+ * as it is received, rather than creating a separate thread
+ * to process the connection.
+ */
+public class DataServer {
+
+    public static final int LISTENING_PORT = 32007;
+
+    public static void main(String[] args) {
+
+        ServerSocket listener;  // Listens for incoming connections.
+        Socket connection;      // For communication with the connecting program.
+
+        /* Accept and process connections forever, or until some error occurs.
+           (Note that errors that occur while communicating with a connected
+           program are caught and handled in the sendDate() routine, so
+           they will not crash the server.) */
+
+        try {
+            listener = new ServerSocket(LISTENING_PORT);
+            System.out.println("Listening on port " + LISTENING_PORT);
+            while (true) {
+                // Accept next connection request and handle it.
+                connection = listener.accept();
+                sendDate(connection);
+            }
+        }
+        catch (Exception e) {
+            System.out.println("Sorry, the server has shut down.");
+            System.out.println("Error:  " + e);
+            return;
+        }
+
+    }  // end main()
+
+
+    /**
+     * The parameter, client, is a socket that is already connected to another
+     * program.  Get an output stream for the connection, send the current time,
+     * and close the connection.
+     */
+    private static void sendDate(Socket client) {
+        try {
+            System.out.println("Connection from " +
+                    client.getInetAddress().toString() );
+//            Date now = new Date();  // The current date and time.
+//            PrintWriter outgoing;   // Stream for sending data.
+//            outgoing = new PrintWriter( client.getOutputStream() );
+//            outgoing.println( now.toString() );
+//            outgoing.println("You already connect to the server");
+//            outgoing.flush();  // Make sure the data is actually sent!
+//            client.close();
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(client.getInputStream()));
+            PrintWriter out = new PrintWriter(client.getOutputStream(), true);
+            BufferedReader console  = new BufferedReader(new InputStreamReader(System.in));
+
+            String message;
+            while ((message = in.readLine()) != null) {
+                System.out.println("Client: " + message);
+
+//                if (message.equalsIgnoreCase("bye")) {
+//                    out.println("Goodbye client!");
+//                    break;
+//                }
+
+//                out.println("Server received: " + message);
+                System.out.print("Server: ");
+                String response = console.readLine();
+                out.println(response);
+            }
+
+            client.close();
+        }
+        catch (Exception e){
+            System.out.println("Error: " + e);
+        }
+    } // end sendDate()
+
+
+} //end class DateServer
